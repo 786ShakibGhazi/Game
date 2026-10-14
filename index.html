@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEAD CRUSH - The Face-Swapping Match-3 Puzzle Game</title>
+    <meta name="description" content="HEAD CRUSH is a free match-3 puzzle game for Android. Swap heads, crush combos across 100 levels and 10 worlds, and play with your own face photos as game pieces.">
+    <meta name="theme-color" content="#07031a">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="HEAD CRUSH - Match heads. Crush combos.">
+    <meta property="og:description" content="Free match-3 puzzle game with 100 levels, 10 worlds and a Custom Face mode that turns your friends into game pieces.">
+    <meta property="og:image" content="assets/logo.png">
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --bg: #07031a;    git config --global user.name "SHAKIB GHAZI"
+    git config --global user.email "your-real-email@example.com"
+    --bg-2: #0d0221;
+    --card: rgba(255, 255, 255, 0.05);
+    --line: rgba(255, 255, 255, 0.1);
+    --purple: #7c4dff;
+    --purple-d: #6200ea;
+    --cyan: #00e5ff;
+    --yellow: #ffe600;
+    --pink: #ff4081;
+    --text: #eef0ff;
+    --muted: #a9acd0;
+    --radius: 20px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body {
+    font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: radial-gradient(1200px 700px at 80% -10%, #2a0f6b 0%, transparent 60%),
+                radial-gradient(900px 600px at -10% 30%, #0b3a5a 0%, transparent 55%),
+                var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { width: min(1160px, 92%); margin: 0 auto; }
+.narrow { width: min(820px, 92%); }
+
+/* Starfield */
+.stars { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.stars i {
+    position: absolute; width: 3px; height: 3px; border-radius: 50%;
+    background: #fff; opacity: .6; animation: twinkle 4s ease-in-out infinite;
+}
+@keyframes twinkle { 0%, 100% { opacity: .15; transform: scale(.8); } 50% { opacity: .9; transform: scale(1.3); } }
+
+/* Nav */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; transition: background .3s, box-shadow .3s; }
+.nav.scrolled { background: rgba(7, 3, 26, .85); backdrop-filter: blur(12px); box-shadow: 0 1px 0 var(--line); }
+.nav-inner { display: flex; align-items: center; gap: 24px; height: 70px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: 'Bungee', cursive; font-size: 20px; color: var(--yellow); letter-spacing: 1px; }
+.brand:hover { text-decoration: none; }
+.brand img { border-radius: 10px; }
+.nav-links { display: flex; gap: 26px; margin-left: auto; }
+.nav-links a { color: var(--text); font-weight: 500; font-size: 15px; opacity: .85; }
+.nav-links a:hover { opacity: 1; color: var(--cyan); text-decoration: none; }
+.burger { display: none; background: none; border: 0; cursor: pointer; padding: 8px; }
+.burger span { display: block; width: 24px; height: 3px; background: #fff; margin: 5px 0; border-radius: 3px; }
+
+/* Buttons */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    border: 0; cursor: pointer; font-family: inherit; font-weight: 700; color: #fff;
+    border-radius: 999px; padding: 12px 24px; transition: transform .2s, box-shadow .2s;
+}
+.btn:hover { transform: translateY(-3px); text-decoration: none; }
+.btn-play { background: linear-gradient(135deg, var(--purple), var(--pink)); box-shadow: 0 8px 28px rgba(124, 77, 255, .45); }
+.btn-play:hover { box-shadow: 0 12px 36px rgba(255, 64, 129, .55); }
+.btn-ghost { background: transparent; border: 2px solid var(--line); color: var(--text); }
+.btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+.btn-sm { padding: 9px 20px; font-size: 14px; }
+.btn-lg { padding: 14px 30px; font-size: 16px; }
+.btn-play span { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
+.btn-play small { font-size: 10px; letter-spacing: 1.5px; opacity: .85; font-weight: 600; }
+.nav .btn-play { margin-left: 8px; }
+
+/* Hero */
+.hero { padding: 140px 0 90px; position: relative; }
+.hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; }
+.pill {
+    display: inline-block; padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 600;
+    background: rgba(0, 229, 255, .1); border: 1px solid rgba(0, 229, 255, .35); color: var(--cyan);
+}
+.title { font-family: 'Bungee', cursive; line-height: .95; margin: 22px 0 18px; font-weight: 400; }
+.t-head, .t-crush { display: block; font-size: clamp(56px, 10vw, 118px); }
+.t-head { color: #fff; text-shadow: 0 0 30px rgba(124, 77, 255, .8), 4px 4px 0 var(--purple-d); }
+.t-crush {
+    background: linear-gradient(90deg, var(--yellow), var(--pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 24px rgba(255, 64, 129, .45));
+}
+.lead { font-size: 19px; color: var(--muted); max-width: 520px; }
+.lead strong { color: var(--yellow); }
+.cta { display: flex; flex-wrap: wrap; gap: 14px; margin: 30px 0; }
+.mini-stats { list-style: none; display: flex; gap: 28px; flex-wrap: wrap; }
+.mini-stats li { display: flex; flex-direction: column; }
+.mini-stats strong { font-family: 'Bungee', cursive; font-size: 30px; color: var(--cyan); font-weight: 400; }
+.mini-stats span { font-size: 13px; color: var(--muted); }
+
+/* Phone mockup */
+.hero-visual { position: relative; display: flex; justify-content: center; }
+.glow {
+    position: absolute; width: 420px; height: 420px; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(124, 77, 255, .55), transparent 65%); filter: blur(30px);
+}
+.phone {
+    position: relative; width: 310px; padding: 40px 16px 20px; border-radius: 42px;
+    background: linear-gradient(160deg, #1a0b45, #0b0626);
+    border: 3px solid #3b2a7a; box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 8px rgba(255, 255, 255, .04);
+    animation: bob 6s ease-in-out infinite;
+}
+.phone-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 90px; height: 12px; border-radius: 10px; background: #05020f; }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-14px) rotate(1deg); } }
+.hud { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 8px; margin-bottom: 10px; }
+.hud-box { background: rgba(255, 255, 255, .07); border: 1px solid var(--line); border-radius: 12px; text-align: center; padding: 4px 0; }
+.hud-box small { display: block; font-size: 9px; letter-spacing: 1.5px; color: var(--muted); }
+.hud-box b { font-family: 'Bungee', cursive; font-weight: 400; font-size: 16px; color: var(--yellow); }
+.progress { height: 8px; background: rgba(255, 255, 255, .1); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+.bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--cyan), var(--yellow)); border-radius: 8px; transition: width .6s; }
+.board { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; padding: 6px; border-radius: 18px; background: rgba(0, 0, 0, .35); border: 1px solid var(--line); }
+.cell { aspect-ratio: 1; border-radius: 50%; background: rgba(255, 255, 255, .06); display: grid; place-items: center; transition: transform .35s, opacity .35s; }
+.cell img { width: 88%; height: 88%; object-fit: contain; }
+.cell.pop { transform: scale(1.35); opacity: 0; }
+.cell.drop { animation: drop .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes drop { from { transform: translateY(-120%); opacity: 0; } to { transform: none; opacity: 1; } }
+.combo {
+    position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%) scale(.5); opacity: 0;
+    font-family: 'Bungee', cursive; font-size: 30px; color: var(--yellow); text-shadow: 0 0 18px var(--pink), 3px 3px 0 var(--purple-d); pointer-events: none; white-space: nowrap;
+}
+.combo.show { animation: comboPop 1s ease-out; }
+@keyframes comboPop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.5); } 25% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -90%) scale(1); } }
+
+.float { position: absolute; width: 74px; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .5)); animation: floaty 7s ease-in-out infinite; }
+.f1 { top: 2%; left: 4%; animation-delay: 0s; }
+.f2 { top: 14%; right: 0; width: 64px; animation-delay: -2s; }
+.f3 { bottom: 12%; left: -2%; width: 80px; animation-delay: -4s; }
+.f4 { bottom: 2%; right: 6%; width: 66px; animation-delay: -1s; }
+.f5 { top: 46%; left: -8%; width: 54px; animation-delay: -3s; }
+@keyframes floaty { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-22px) rotate(10deg); } }
+
+/* Sections */
+.section { padding: 100px 0; position: relative; }
+.section.alt { background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.eyebrow { text-align: center; color: var(--cyan); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; font-size: 13px; }
+.h2 { font-family: 'Bungee', cursive; font-weight: 400; text-align: center; font-size: clamp(30px, 5vw, 52px); line-height: 1.1; margin: 10px 0 40px; }
+.grad { background: linear-gradient(90deg, var(--yellow), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { text-align: center; color: var(--muted); max-width: 640px; margin: -20px auto 40px; font-size: 17px; }
+.sub.left { text-align: left; margin: -10px 0 20px; }
+
+.grid { display: grid; gap: 22px; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px;
+    transition: transform .3s, border-color .3s, box-shadow .3s; backdrop-filter: blur(6px);
+}
+.card:hover { transform: translateY(-8px); border-color: rgba(124, 77, 255, .7); box-shadow: 0 18px 50px rgba(124, 77, 255, .25); }
+.card h3 { font-size: 19px; margin: 14px 0 8px; }
+.card p { color: var(--muted); font-size: 15px; }
+.icon { width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center; font-size: 30px; background: linear-gradient(135deg, rgba(124, 77, 255, .35), rgba(255, 64, 129, .25)); }
+
+/* Worlds */
+.worlds { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.world {
+    --c: #fff; position: relative; overflow: hidden; border-radius: 18px; padding: 20px 14px; text-align: center;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--c) 35%, #0b0626), #0b0626 75%);
+    border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); transition: transform .3s, box-shadow .3s;
+}
+.world:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 14px 40px color-mix(in srgb, var(--c) 45%, transparent); }
+.world .em { font-size: 40px; display: block; }
+.world h4 { font-size: 15px; margin-top: 6px; }
+.world small { color: var(--muted); font-size: 12px; }
+.world img { width: 44px; margin: 10px auto 0; }
+
+/* Power-ups */
+.power { text-align: center; position: relative; }
+.power .badge { position: absolute; top: 16px; right: 16px; background: var(--yellow); color: #1a0b45; font-weight: 700; font-size: 12px; border-radius: 999px; padding: 3px 12px; }
+.power-art { font-size: 64px; margin: 10px 0; filter: drop-shadow(0 0 18px rgba(255, 230, 0, .5)); }
+.boosters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 26px; }
+.booster { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px; border-radius: 18px; border: 1px dashed rgba(0, 229, 255, .4); background: rgba(0, 229, 255, .05); }
+.booster span { font-size: 34px; }
+.booster b { margin-top: 4px; }
+.booster small { color: var(--muted); }
+.obstacles { text-align: center; color: var(--muted); margin-top: 28px; }
+.obstacles b { color: var(--text); }
+
+/* Steps */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; counter-reset: s; }
+.step { text-align: center; padding: 10px; }
+.num {
+    width: 68px; height: 68px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center;
+    font-family: 'Bungee', cursive; font-size: 28px; color: #1a0b45; background: linear-gradient(135deg, var(--yellow), var(--pink));
+    box-shadow: 0 8px 26px rgba(255, 64, 129, .4);
+}
+.step h3 { font-size: 18px; margin-bottom: 6px; }
+.step p { color: var(--muted); font-size: 14px; }
+
+/* Faces */
+.faces-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+.faces-grid .eyebrow, .faces-grid .h2 { text-align: left; }
+.faces-grid .h2 { margin-bottom: 24px; }
+.checks { list-style: none; margin: 18px 0; }
+.checks li { padding-left: 34px; position: relative; margin: 10px 0; }
+.checks li::before { content: '\2713'; position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--cyan); color: #04202a; font-weight: 800; font-size: 14px; }
+.note { font-size: 13px; color: var(--muted); font-style: italic; }
+.face-wall { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 22px; border-radius: 28px; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); }
+.face-wall .slot { aspect-ratio: 1; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .06); display: grid; place-items: center; overflow: hidden; animation: pulse 3.5s ease-in-out infinite; }
+.face-wall .slot img { width: 90%; }
+.face-wall .slot.empty { border-style: dashed; color: var(--muted); font-size: 22px; animation: none; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); border-color: var(--cyan); } }
+
+/* Privacy strip */
+.strip { padding: 50px 0; }
+.strip-inner { display: flex; align-items: center; gap: 26px; }
+.shield { font-size: 54px; flex: none; }
+.strip h3 { font-size: 22px; margin-bottom: 4px; }
+.strip p { color: var(--muted); }
+
+/* FAQ */
+.qa { background: var(--card); border: 1px solid var(--line); border-radius: 16px; margin-bottom: 12px; padding: 4px 22px; }
+.qa summary { cursor: pointer; font-weight: 600; padding: 16px 0; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+.qa summary::-webkit-details-marker { display: none; }
+.qa summary::after { content: '+'; color: var(--cyan); font-size: 24px; line-height: 1; transition: transform .3s; }
+.qa[open] summary::after { transform: rotate(45deg); }
+.qa p { color: var(--muted); padding-bottom: 18px; }
+
+/* Download */
+.download { text-align: center; background: radial-gradient(700px 360px at 50% 100%, rgba(124, 77, 255, .4), transparent 70%); }
+.download-logo { margin: 0 auto 10px; filter: drop-shadow(0 12px 30px rgba(255, 64, 129, .45)); animation: bob 6s ease-in-out infinite; }
+.download .h2 { margin-bottom: 16px; }
+.download .sub { margin: 0 auto 28px; }
+.soon { margin-top: 14px; color: var(--yellow); font-weight: 600; }
+
+/* Footer */
+.footer { border-top: 1px solid var(--line); padding: 36px 0; background: rgba(0, 0, 0, .25); }
+.footer-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+.footer nav { display: flex; gap: 22px; flex-wrap: wrap; }
+.footer nav a { color: var(--muted); font-size: 14px; }
+.footer nav a:hover { color: var(--cyan); }
+.footer p { width: 100%; text-align: center; color: var(--muted); font-size: 12px; }
+
+/* Scroll reveal */
+.reveal {
+    opacity: 0; translate: 0 34px;
+    transition-property: opacity, translate, transform, border-color, box-shadow;
+    transition-duration: .7s, .7s, .3s, .3s, .3s;
+}
+.reveal.in { opacity: 1; translate: 0 0; }
+
+/* Responsive */
+@media (max-width: 960px) {
+    .hero-grid, .faces-grid { grid-template-columns: 1fr; }
+    .hero { padding-top: 110px; text-align: center; }
+    .lead { margin: 0 auto; }
+    .cta, .mini-stats { justify-content: center; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .worlds { grid-template-columns: repeat(3, 1fr); }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .faces-grid .eyebrow, .faces-grid .h2 { text-align: center; }
+    .sub.left { text-align: center; }
+    .hero-visual { margin-top: 30px; }
+}
+@media (max-width: 760px) {
+    .burger { display: block; margin-left: auto; }
+    .nav .btn-play { display: none; }
+    .nav-links {
+        position: absolute; top: 70px; left: 0; right: 0; flex-direction: column; gap: 0; margin: 0;
+        background: rgba(7, 3, 26, .97); border-bottom: 1px solid var(--line); max-height: 0; overflow: hidden; transition: max-height .35s;
+    }
+    .nav-links.open { max-height: 360px; }
+    .nav-links a { padding: 16px 6%; border-top: 1px solid var(--line); }
+}
+@media (max-width: 600px) {
+    .section { padding: 70px 0; }
+    .grid-3, .boosters { grid-template-columns: 1fr; }
+    .worlds { grid-template-columns: repeat(2, 1fr); }
+    .steps { grid-template-columns: 1fr; }
+    .strip-inner { flex-direction: column; text-align: center; }
+    .footer-inner { justify-content: center; text-align: center; }
+    .float { display: none; }
+    .phone { width: 280px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; translate: none; }
+}
+</style>
+</head>
+<body>
+    <div class="stars" id="stars" aria-hidden="true"></div>
+
+    <!-- NAVIGATION -->
+    <header class="nav" id="nav">
+        <div class="container nav-inner">
+            <a class="brand" href="#top" aria-label="HEAD CRUSH home">
+                <img src="assets/icon.png" alt="" width="40" height="40">
+                <span>HEAD CRUSH</span>
+            </a>
+            <nav class="nav-links" id="navLinks" aria-label="Main">
+                <a href="#features">Features</a>
+                <a href="#worlds">Worlds</a>
+                <a href="#powerups">Power-Ups</a>
+                <a href="#faces">Your Face</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <a class="btn btn-play btn-sm" href="#download" data-play>Play Free</a>
+            <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+        </div>
+    </header>
+
+    <main id="top">
+        <!-- HERO -->
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <span class="pill">&#127918; Free &bull; No Ads &bull; Android</span>
+                    <h1 class="title">
+                        <span class="t-head">HEAD</span>
+                        <span class="t-crush">CRUSH</span>
+                    </h1>
+                    <p class="lead">Match heads. Crush combos. Then put <strong>your friends' faces</strong> on the board and crush them too.</p>
+                    <div class="cta">
+                        <a class="btn btn-play btn-lg" href="#download" data-play>
+                            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3.6 1.8c-.3.3-.5.8-.5 1.4v17.6c0 .6.2 1.1.5 1.4l.1.1L13.6 12v-.2L3.7 1.7l-.1.1zm13.3 6.9L13.6 12l3.3 3.3 3.9-2.2c1.1-.6 1.1-1.7 0-2.3l-3.9-2.1zM14 12.4 3.7 22.6c.4.4 1 .4 1.7 0l11.5-6.5L14 12.4zm0-.8 2.9-3.1L5.4 2c-.7-.4-1.3-.4-1.7 0L14 11.6z"/></svg>
+                            <span><small>GET IT ON</small>Google Play</span>
+                        </a>
+                        <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
+                    </div>
+                    <ul class="mini-stats">
+                        <li><strong>100</strong><span>Levels</span></li>
+                        <li><strong>10</strong><span>Worlds</span></li>
+                        <li><strong>25</strong><span>Face slots</span></li>
+                        <li><strong>0</strong><span>Ads</span></li>
+                    </ul>
+                </div>
+
+                <div class="hero-visual" aria-hidden="true">
+                    <div class="glow"></div>
+                    <img class="float f1" src="assets/n1.png" alt="">
+                    <img class="float f2" src="assets/a2.png" alt="">
+                    <img class="float f3" src="assets/c3.png" alt="">
+                    <img class="float f4" src="assets/h2.png" alt="">
+                    <img class="float f5" src="assets/special_candy_1.png" alt="">
+                    <div class="phone">
+                        <div class="phone-notch"></div>
+                        <div class="hud">
+                            <div class="hud-box"><small>LEVEL</small><b>1</b></div>
+                            <div class="hud-box score"><small>SCORE</small><b id="score">0</b></div>
+                            <div class="hud-box"><small>MOVES</small><b id="moves">24</b></div>
+                        </div>
+                        <div class="progress"><div class="bar" id="bar"></div></div>
+                        <div class="board" id="board"></div>
+                        <div class="combo" id="combo"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="section" id="features">
+            <div class="container">
+                <p class="eyebrow">Why you'll love it</p>
+                <h2 class="h2">Not your average <span class="grad">match-3</span></h2>
+                <div class="grid grid-3">
+                    <article class="card">
+                        <div class="icon">&#128584;</div>
+                        <h3>Your face is the game</h3>
+                        <p>Add up to 25 photos of friends, family or yourself. They become the pieces on the board in Custom Game mode.</p>
+                    </article>
+                    <article class="card">
+                        <div class="icon">&#127942;</div>
+                        <h3>100 handcrafted levels</h3>
+                        <p>Ten themed worlds with new goals, bigger boards and tougher obstacles as you climb. Earn up to 3 stars on every level.</p>
+                    </article>
+                    <article class="card">
+                        <div class="icon">&#128165;</div>
+                        <h3>Explosive combos</h3>
+                        <p>Match 4, 5 or 6 heads to unleash blasts, bombs and novas. Chain cascades for huge scores and bonus lives.</p>
+                    </article>
+                    <article class="card">
+                        <div class="icon">&#129504;</div>
+                        <h3>Smart face detection</h3>
+                        <p>On-device AI finds and crops the face for you, so every piece looks sharp. Your photos never leave your phone.</p>
+                    </article>
+                    <article class="card">
+                        <div class="icon">&#9729;&#65039;</div>
+                        <h3>Play your way</h3>
+                        <p>Jump in as a guest in seconds, or sign in with Google or email to save your progress and continue on any device.</p>
+                    </article>
+                    <article class="card">
+                        <div class="icon">&#127873;</div>
+                        <h3>Free, with zero ads</h3>
+                        <p>No ads, no pop-ups, no in-app purchases. Just a daily lives bonus and pure puzzle fun.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- WORLDS -->
+        <section class="section alt" id="worlds">
+            <div class="container">
+                <p class="eyebrow">10 worlds to conquer</p>
+                <h2 class="h2">Travel from <span class="grad">Sweet Start</span> to <span class="grad">Ultimate Mix</span></h2>
+                <p class="sub">Each world has its own look, music and head collection, with 10 levels apiece.</p>
+                <div class="worlds" id="worldGrid"></div>
+            </div>
+        </section>
+
+        <!-- POWER-UPS -->
+        <section class="section" id="powerups">
+            <div class="container">
+                <p class="eyebrow">Crush smarter</p>
+                <h2 class="h2">Power-ups &amp; <span class="grad">boosters</span></h2>
+                <div class="grid grid-3">
+                    <article class="card power">
+                        <div class="badge">Match 4</div>
+                        <div class="power-art">&#10133;</div>
+                        <h3>Cross Blast</h3>
+                        <p>Clears a full row and column in one go.</p>
+                    </article>
+                    <article class="card power">
+                        <div class="badge">Match 5</div>
+                        <div class="power-art">&#128163;</div>
+                        <h3>Mega Bomb</h3>
+                        <p>Blows up everything around it. Great for stubborn corners.</p>
+                    </article>
+                    <article class="card power">
+                        <div class="badge">Match 6+</div>
+                        <div class="power-art">&#127775;</div>
+                        <h3>Nova</h3>
+                        <p>The biggest blast in the game. Save it for the boss boards.</p>
+                    </article>
+                </div>
+                <div class="boosters">
+                    <div class="booster"><span>&#128161;</span><b>Hint</b><small>Shows a good move when you're stuck</small></div>
+                    <div class="booster"><span>&#128296;</span><b>Hammer</b><small>Smash any single piece</small></div>
+                    <div class="booster"><span>&#128256;</span><b>Shuffle</b><small>Reshuffle the board instantly</small></div>
+                </div>
+                <p class="obstacles">Watch out for <b>frozen cells</b>, <b>chocolate</b>, <b>jelly</b> and <b>ticking bombs</b> as the levels heat up.</p>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="section alt" id="how">
+            <div class="container">
+                <p class="eyebrow">Easy to learn</p>
+                <h2 class="h2">How to <span class="grad">play</span></h2>
+                <div class="steps">
+                    <div class="step"><div class="num">1</div><h3>Swipe &amp; swap</h3><p>Slide a head next to another to swap them.</p></div>
+                    <div class="step"><div class="num">2</div><h3>Match 3 or more</h3><p>Line up identical heads in a row or column to crush them.</p></div>
+                    <div class="step"><div class="num">3</div><h3>Hit the target</h3><p>Reach the score before you run out of moves or time.</p></div>
+                    <div class="step"><div class="num">4</div><h3>Collect stars</h3><p>Earn up to 3 stars per level and unlock the next one.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FACE MODE -->
+        <section class="section" id="faces">
+            <div class="container faces-grid">
+                <div>
+                    <p class="eyebrow">Custom Game mode</p>
+                    <h2 class="h2">Make the board <span class="grad">personal</span></h2>
+                    <p class="sub left">Pick photos from your gallery or snap a new one. HEAD CRUSH finds the face, crops it into a neat circle and turns it into a candy. Choose <em>As It Is</em> or an <em>Anime</em> style filter.</p>
+                    <ul class="checks">
+                        <li>Up to 25 different faces</li>
+                        <li>Face detection runs on your device</li>
+                        <li>Photos are stored only on your phone</li>
+                        <li>Delete any photo at any time</li>
+                    </ul>
+                    <p class="note">Only use photos of people who are happy to appear in your game.</p>
+                </div>
+                <div class="face-wall" id="faceWall" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <!-- PRIVACY STRIP -->
+        <section class="section alt strip">
+            <div class="container strip-inner">
+                <div class="shield">&#128274;</div>
+                <div>
+                    <h3>Your photos stay on your device</h3>
+                    <p>Face photos are processed and stored privately on your phone and are never uploaded. Accounts are optional, and you can delete yours any time from the app. <a href="privacy-policy.html">Read our Privacy Policy</a>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="section" id="faq">
+            <div class="container narrow">
+                <p class="eyebrow">Got questions?</p>
+                <h2 class="h2">Frequently asked <span class="grad">questions</span></h2>
+                <details class="qa"><summary>Is HEAD CRUSH really free?</summary><p>Yes. It is free to play, with no ads and no in-app purchases.</p></details>
+                <details class="qa"><summary>Do I need an account?</summary><p>No. You can play as a guest. Sign in with Google or email if you want your progress saved and synced across devices.</p></details>
+                <details class="qa"><summary>Does the game upload my photos?</summary><p>No. Face detection and storage happen on your device only. Photos are never sent to our servers.</p></details>
+                <details class="qa"><summary>How do I delete my account?</summary><p>Open your Profile in the app and tap <b>Delete account</b>. You can also email us and we will do it for you.</p></details>
+                <details class="qa"><summary>Which devices are supported?</summary><p>Android 7.0 (Nougat) and newer. Camera is optional.</p></details>
+            </div>
+        </section>
+
+        <!-- DOWNLOAD -->
+        <section class="section download" id="download">
+            <div class="container">
+                <img class="download-logo" src="assets/logo.png" alt="HEAD CRUSH logo" width="220" height="220">
+                <h2 class="h2">Ready to <span class="grad">crush</span> some heads?</h2>
+                <p class="sub">Download HEAD CRUSH free on Android.</p>
+                <a class="btn btn-play btn-lg" href="#download" data-play id="playBtn">
+                    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3.6 1.8c-.3.3-.5.8-.5 1.4v17.6c0 .6.2 1.1.5 1.4l.1.1L13.6 12v-.2L3.7 1.7l-.1.1zm13.3 6.9L13.6 12l3.3 3.3 3.9-2.2c1.1-.6 1.1-1.7 0-2.3l-3.9-2.1zM14 12.4 3.7 22.6c.4.4 1 .4 1.7 0l11.5-6.5L14 12.4zm0-.8 2.9-3.1L5.4 2c-.7-.4-1.3-.4-1.7 0L14 11.6z"/></svg>
+                    <span><small>GET IT ON</small>Google Play</span>
+                </a>
+                <p class="soon" id="soon" hidden>Coming soon to Google Play</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="brand"><img src="assets/icon.png" alt="" width="32" height="32"><span>HEAD CRUSH</span></div>
+            <nav aria-label="Legal">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms.html">Terms &amp; Conditions</a>
+                <a href="mailto:headcrush.game@gmail.com">Contact</a>
+            </nav>
+            <p>&copy; 2026 HEAD CRUSH. All rights reserved. Google Play is a trademark of Google LLC.</p>
+        </div>
+    </footer>
+
+    <script>
+(function () {
+    'use strict';
+
+    // Set to true once the app is live on Google Play.
+    var PLAY_LIVE = false;
+    var PLAY_URL = 'https://play.google.com/store/apps/details?id=com.headcrush.game';
+
+    var CANDIES = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'a1', 'a2', 'a3', 'a4', 'c1', 'c2', 'c3', 'c4', 'h1', 'h2', 'h3', 'h4'];
+    var BOARD_CANDIES = ['n1', 'n3', 'a2', 'c1', 'h2'];
+    var WORLDS = [
+        ['\uD83C\uDF6C', 'Sweet Start', '#FFD600', 'n1'],
+        ['\uD83C\uDF6D', 'Sugar Rush', '#FF6D00', 'n3'],
+        ['\uD83E\uDD81', 'Jungle Roar', '#2E7D32', 'n6'],
+        ['\uD83D\uDC7B', 'Horror Night', '#7B1FA2', 'a1'],
+        ['\u2693', 'Pirate Bay', '#1565C0', 'a3'],
+        ['\uD83D\uDC8E', 'Crystal Cave', '#00E5FF', 'c1'],
+        ['\uD83D\uDC09', "Dragon's Lair", '#D50000', 'c3'],
+        ['\uD83D\uDE80', 'Space Odyssey', '#304FFE', 'h1'],
+        ['\u26A1', 'Candy Storm', '#FF6F00', 'h3'],
+        ['\uD83D\uDD25', 'Ultimate Mix', '#FF1744', 'h4']
+    ];
+
+    function $(id) { return document.getElementById(id); }
+    function rand(n) { return Math.floor(Math.random() * n); }
+    function img(name) {
+        var el = document.createElement('img');
+        el.src = 'assets/' + name + '.png';
+        el.alt = '';
+        el.loading = 'lazy';
+        return el;
+    }
+
+    // Starfield
+    var stars = $('stars');
+    for (var s = 0; s < 70; s++) {
+        var star = document.createElement('i');
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+        star.style.transform = 'scale(' + (0.5 + Math.random()).toFixed(2) + ')';
+        stars.appendChild(star);
+    }
+
+    // Nav: shadow on scroll + mobile menu
+    var nav = $('nav');
+    function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 20); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    var burger = $('burger');
+    var links = $('navLinks');
+    burger.addEventListener('click', function () {
+        var open = links.classList.toggle('open');
+        burger.setAttribute('aria-expanded', String(open));
+    });
+    links.addEventListener('click', function () {
+        links.classList.remove('open');
+        burger.setAttribute('aria-expanded', 'false');
+    });
+
+    // Worlds
+    var worldGrid = $('worldGrid');
+    WORLDS.forEach(function (w, i) {
+        var card = document.createElement('div');
+        card.className = 'world reveal';
+        card.style.setProperty('--c', w[2]);
+        card.style.transitionDelay = (i % 5) * 70 + 'ms';
+        card.innerHTML = '<span class="em">' + w[0] + '</span><h4>' + w[1] + '</h4><small>Levels ' + (i * 10 + 1) + '-' + (i * 10 + 10) + '</small>';
+        card.appendChild(img(w[3]));
+        worldGrid.appendChild(card);
+    });
+
+    // Face wall
+    var wall = $('faceWall');
+    for (var f = 0; f < 15; f++) {
+        var slot = document.createElement('div');
+        if (f < 10) {
+            slot.className = 'slot';
+            slot.style.animationDelay = (f * 0.25).toFixed(2) + 's';
+            slot.appendChild(img(CANDIES[f * 2 % CANDIES.length]));
+        } else {
+            slot.className = 'slot empty';
+            slot.textContent = '+';
+        }
+        wall.appendChild(slot);
+    }
+
+    // Hero game board demo
+    var SIZE = 6;
+    var board = $('board');
+    var scoreEl = $('score');
+    var movesEl = $('moves');
+    var barEl = $('bar');
+    var comboEl = $('combo');
+    var cells = [];
+    var types = [];
+    var score = 0;
+    var moves = 24;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function setCell(i, t) {
+        types[i] = t;
+        cells[i].innerHTML = '';
+        cells[i].appendChild(img(BOARD_CANDIES[t]));
+    }
+
+    function hasMatch(i) {
+        var r = Math.floor(i / SIZE), c = i % SIZE, t = types[i];
+        if (c >= 2 && types[i - 1] === t && types[i - 2] === t) return true;
+        if (r >= 2 && types[i - SIZE] === t && types[i - 2 * SIZE] === t) return true;
+        return false;
+    }
+
+    for (var i = 0; i < SIZE * SIZE; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'cell';
+        board.appendChild(cell);
+        cells.push(cell);
+        types.push(0);
+        var t;
+        do { t = rand(BOARD_CANDIES.length); types[i] = t; } while (hasMatch(i));
+        setCell(i, t);
+    }
+
+    function animateScore(to) {
+        var from = score;
+        score = to;
+        var start = performance.now();
+        (function step(now) {
+            var p = Math.min(1, (now - start) / 500);
+            scoreEl.textContent = Math.round(from + (to - from) * p).toLocaleString();
+            if (p < 1) requestAnimationFrame(step);
+        })(start);
+        barEl.style.width = Math.min(100, (to / 4000) * 100) + '%';
+    }
+
+    var comboWords = ['SWEET!', 'COMBO x2!', 'AWESOME!', 'COMBO x3!', 'CRUSHED!'];
+    var busy = false;
+
+    function demoMatch() {
+        if (busy) return;
+        busy = true;
+        var horizontal = Math.random() > 0.5;
+        var len = 3 + rand(2);
+        var row = rand(SIZE), col = rand(SIZE - len + 1);
+        var picked = [];
+        for (var k = 0; k < len; k++) {
+            picked.push(horizontal ? row * SIZE + col + k : (col + k) * SIZE + row);
+        }
+        var t = rand(BOARD_CANDIES.length);
+        picked.forEach(function (idx) { setCell(idx, t); });
+
+        setTimeout(function () {
+            picked.forEach(function (idx) { cells[idx].classList.add('pop'); });
+            comboEl.textContent = comboWords[rand(comboWords.length)];
+            comboEl.classList.remove('show');
+            void comboEl.offsetWidth;
+            comboEl.classList.add('show');
+            animateScore(score + 120 * len);
+            moves = moves > 1 ? moves - 1 : 24;
+            movesEl.textContent = moves;
+            if (score > 3800) { score = 0; barEl.style.width = '0'; }
+        }, 600);
+
+        setTimeout(function () {
+            picked.forEach(function (idx) {
+                var nt;
+                do { nt = rand(BOARD_CANDIES.length); } while (nt === t);
+                setCell(idx, nt);
+                cells[idx].classList.remove('pop');
+                cells[idx].classList.remove('drop');
+                void cells[idx].offsetWidth;
+                cells[idx].classList.add('drop');
+            });
+            busy = false;
+        }, 1200);
+    }
+
+    if (!reduceMotion) {
+        setTimeout(demoMatch, 900);
+        setInterval(demoMatch, 2600);
+    }
+
+    // Google Play buttons
+    var playBtns = document.querySelectorAll('[data-play]');
+    playBtns.forEach(function (btn) {
+        if (PLAY_LIVE) {
+            btn.href = PLAY_URL;
+            btn.target = '_blank';
+            btn.rel = 'noopener';
+        } else {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                $('download').scrollIntoView({ behavior: 'smooth' });
+                $('soon').hidden = false;
+            });
+        }
+    });
+
+    // Scroll reveal
+    var revealTargets = document.querySelectorAll('.card, .step, .booster, .qa, .face-wall, .strip-inner, .h2, .eyebrow');
+    revealTargets.forEach(function (el) { el.classList.add('reveal'); });
+    var all = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+            });
+        }, { threshold: 0.12 });
+        all.forEach(function (el) { io.observe(el); });
+    } else {
+        all.forEach(function (el) { el.classList.add('in'); });
+    }
+})();
+</script>
+</body>
+</html>
